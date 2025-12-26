@@ -1,14 +1,14 @@
 from fastapi import FastAPI
+from schemas import UserCreate
+import crud
 
 app = FastAPI()
 
-@app.get("/")
-def root():
-    return {"message": "API Rodando :))"}
+@app.post("/users")
+def create_user(user: UserCreate):
+    return crud.create_user(user)
 
-@app.post("/users/{user_id}")
-def get_user(user_id: int, active: bool = True):
-    return {
-        "id": user_id,
-        "active": active
-    }
+@app.get("/users")
+def list_users():
+    return crud.get_users()
+
