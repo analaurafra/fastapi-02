@@ -124,3 +124,24 @@ app/
 ```
 
 📌 ANTES disso, separar arquivos atrapalha mais do que ajuda
+
+
+## Resumo rápido dos Passos 2, 3 e 4
+
+#### ✔ Passo 2 – READ
+
+- URL → dados
+- GET
+- Path / Query Params
+
+#### ✔ Passo 3 – CREATE
+
+- Body → dados
+- POST
+- Pydantic valida e documenta
+
+#### ✔ Passo 4 – CRUD + DB
+
+- Dados reais
+- Persistência
+- Arquitetura profissional
