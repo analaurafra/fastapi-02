@@ -1,147 +1,122 @@
-## Uma API FastAPI bem feita evolui assim:
+# fastapi_monolito
 
-1️⃣ **Rotas e parâmetros →** como o mundo conversa com sua API
-2️⃣ **Validação (Pydantic) →** garantir que os dados fazem sentido
-3️⃣ **Responses / contratos →** controlar o que a API devolve
-4️⃣ **CRUD + Banco →** persistência e vida real
+Uma aplicação de exemplo construída com FastAPI que demonstra um pequeno CRUD de usuários. Esta versão é intencionalmente simples e serve como ponto de partida para evoluções (persistência com SQLAlchemy, autenticação, validações adicionais, etc).
 
+## Sumário
+- [Recursos](#recursos)
+- [Tecnologias](#tecnologias)
+- [Pré-requisitos](#pré-requisitos)
+- [Instalação e execução](#instalação-e-execução)
+- [Endpoints da API](#endpoints-da-api)
+- [Modelos e Schemas](#modelos-e-schemas)
+- [Banco de dados](#banco-de-dados)
+- [Testes](#testes)
+- [Contribuição](#contribuição)
+- [Licença](#licença)
+- [Autor](#autor)
 
-## **PASSO 2** – Rotas, Path e Query Params (Dia 2)
-🧠
-➡️ Como o cliente conversa com sua API
+## Recursos
+- Criar usuário (POST /users)
+- Listar usuários (GET /users)
+- Estrutura mínima com FastAPI, Pydantic e SQLAlchemy
+- Scripts de teste simples incluídos
 
-**Exemplos:**
+## Tecnologias
+- Python
+- FastAPI
+- Uvicorn
+- SQLAlchemy
+- Pydantic
+- Loguru (log)
 
-```
-/users/1
+## Pré-requisitos
+- Python 3.8+
+- pip
 
-/users/1?active=true
+## Instalação e execução
 
-```
-
-### 📌 Conceitos-chave:
-
-Path Params → identificam um recurso
-
-```
-/users/{user_id}
-```
-
-Query Params → filtros, flags, paginação
-
-```
-?active=true
-```
-
-## 📌 PASSO 3 – Validação com Pydantic (Dia 3)
-🧠 O que muda aqui?
-
-➡️ Agora você valida dados enviados no corpo da requisição (JSON)
-
-Antes:
-
-qualquer coisa passa
-
-
-Depois (com Pydantic):
-
+1. Clone o repositório:
+```bash
+git clone https://github.com/analaurafra/fastapi_monolito.git
+cd fastapi_monolito
 ```
 
-{
-  "name": "Ana",
-  "email": "ana@email.com",
-  "age": 25
-}
-
+2. Recomenda-se criar um ambiente virtual e instalar dependências:
+```bash
+python -m venv .venv
+source .venv/bin/activate    # macOS / Linux
+# .venv\Scripts\activate     # Windows
+pip install -r requirements.txt
 ```
 
-## 📌 Conceitos-chave
-
-BaseModel
-
-Tipagem forte
-
-Erros automáticos (422)
-
-🎯 Objetivo real
-
-Garantir que dados errados nunca entrem no sistema
-
-Pydantic serve para:
-
-validar
-
-converter
-
-documentar
-
-📌 Ele não “mostra logs”
-📌 Ele bloqueia erros silenciosamente
-
-O Swagger muda porque:
-
-FastAPI lê a assinatura da função
-
-Gera o schema automaticamente
-
-
-## PASSO 4 – CRUD + Banco (Dia 4 – parte 2)
-
-Agora sim entra o mundo real.
-
-🧠 O que muda?
-
-➡️ Os dados deixam de ser “temporários”
-➡️ Passam a ser persistidos
-
-Você aprende:
-
-
-- Create
-- Read
-- Update
-- Delete
-
-E começa a responder perguntas como:
-
-Onde os dados ficam?
-
-Como buscar?
-
-Como atualizar?
-
-## 📌 Arquitetura começa a importar
-
-Aqui sim faz sentido separar arquivos:
-
-```
-app/
- ├── main.py        → rotas
- ├── schemas.py     → Pydantic
- ├── models.py      → Banco (ORM)
- ├── database.py   → conexão
-
+3. Execute a aplicação:
+```bash
+uvicorn main:app --reload
 ```
 
-📌 ANTES disso, separar arquivos atrapalha mais do que ajuda
+A API ficará disponível por padrão em http://127.0.0.1:8000. A documentação automática do FastAPI pode ser acessada em:
+- Swagger UI: http://127.0.0.1:8000/docs
+- ReDoc: http://127.0.0.1:8000/redoc
 
+## Endpoints da API
 
-## Resumo rápido dos Passos 2, 3 e 4
+- POST /users
+  - Descrição: cria um novo usuário
+  - Body (JSON):
+    ```json
+    {
+      "name": "João",
+      "email": "joao@example.com",
+      "age": 30
+    }
+    ```
+  - Resposta: retorna o usuário criado (no formato definido em `schemas.UserCreate` / `schemas.UserResponse`)
 
-#### ✔ Passo 2 – READ
+- GET /users
+  - Descrição: retorna a lista de usuários
+  - Resposta: array de usuários
 
-- URL → dados
-- GET
-- Path / Query Params
+Exemplo usando curl:
+```bash
+curl -X POST "http://127.0.0.1:8000/users" -H "Content-Type: application/json" -d '{"name":"Maria","email":"maria@example.com","age":25}'
+```
 
-#### ✔ Passo 3 – CREATE
+## Modelos e Schemas
+- models.py
+  - Classe `User` (SQLAlchemy): id, name, email, age
+- schemas.py
+  - `UserCreate` (Pydantic): name, email, age
+  - `UserResponse` (herda de UserCreate e adiciona id)
 
-- Body → dados
-- POST
-- Pydantic valida e documenta
+Observação: o arquivo `crud.py` atualmente usa uma lista em memória (`fake_users_db`) para armazenar usuários. Isso significa que os dados não persistem entre reinícios da aplicação. A estrutura já contém `database.py` e `models.py` com SQLAlchemy para facilitar a migração para persistência real.
 
-#### ✔ Passo 4 – CRUD + DB
+## Banco de dados
+- `database.py` aponta para SQLite local em `sqlite:///./test.db`.
+- Atualmente o CRUD utilizado pelo endpoint adiciona dados a uma lista em memória. Se desejar, posso integrar `crud.py` para usar a sessão SQLAlchemy e persistir no `test.db`.
 
-- Dados reais
-- Persistência
-- Arquitetura profissional
+## Testes
+Existem scripts simples de teste no repositório:
+- `test_request.py`
+- `test_post_temp.py`
+
+Você pode executá-los (após iniciar o servidor) com:
+```bash
+python test_request.py
+# ou
+python test_post_temp.py
+```
+
+(Dependendo do conteúdo dos scripts, pode ser necessário instalar bibliotecas extras como `requests`. Se quiser, eu posso revisar e adaptar os scripts para pytest.)
+
+## Contribuição
+Contribuições são bem-vindas. Para contribuir:
+1. Fork e clone o repositório
+2. Crie uma branch com a sua feature/fix: `git checkout -b feature/nome-da-feature`
+3. Faça commits claros e envie um PR
+
+## Licença
+Veja o arquivo `LICENSE` no repositório para detalhes sobre a licença.
+
+## Autor
+Repositório: [analaurafra/fastapi_monolito](https://github.com/analaurafra/fastapi_monolito)
+Contato: perfil GitHub do autor.
